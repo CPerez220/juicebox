@@ -29,23 +29,22 @@ postsRouter.get('/', async (req, res, next) => {
       return false;
     });
   
-    res.send({
-      posts
-    });
+    res.send(posts);
   } catch ({ name, message }) {
     next({ name, message });
   }
 });
 
 postsRouter.post('/', requireUser, async (req, res, next) => {
-  const { title, content = "" } = req.body;
+
+  const { title, content = "", tags } = req.body;
 
   const postData = {};
-
   try {
     postData.authorId = req.user.id;
     postData.title = title;
     postData.content = content;
+    postData.tags = tags;
 
     const post = await createPost(postData);
 
@@ -98,7 +97,13 @@ postsRouter.patch('/:postId', requireUser, async (req, res, next) => {
 });
 
 postsRouter.delete('/:postId', requireUser, async (req, res, next) => {
-  res.send({ message: 'under construction' });
+  try {
+    const postId = req.params.id;
+    const result = await deletePost(postId);
+    res.send(result);
+  } catch (error) {
+    res.sendStatus(500);
+  }
 });
 
 module.exports = postsRouter;
